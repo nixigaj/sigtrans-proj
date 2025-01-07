@@ -1,52 +1,50 @@
 import numpy as np
-from scipy.signal import cheby1, sosfilt, sosfreqz
+from scipy.signal import sosfreqz
 import matplotlib.pyplot as plt
 from bandpass import create_bandpass_filter
+from lowpass import create_lowpass_filter
 
-
-# Sampling frequency and filter specifications
-fs = 48000        # Sampling frequency in Hz
-f_low, f_high = 4300, 4500  # Passband frequencies in Hz
-f_stop_low, f_stop_high = 4250, 4550  # Stopband frequencies in Hz
-R_p = 1           # Passband ripple in dB
-R_s = 40          # Stopband attenuation in dB
+# Properties
+fs = 48000  # Sampling frequency
+f_low, f_high = 4300, 4500  # Passband frequencies
+f_stop_low, f_stop_high = 4250, 4550  # Stopband frequencies
+R_p = 1     # Passband ripple
+R_s = 40    # Stopband attenuation
 
 # Create the bandpass filter
 sos = create_bandpass_filter(fs, f_low, f_high, R_p, R_s)
 
-# Number of frequency points for higher resolution
-worN = 10000  # Increase for more resolution
-
 # Compute the frequency response of the bandpass filter
+worN = 10000 # Increases the graphical resolution
 frequencies, h = sosfreqz(sos, worN=worN, fs=fs)
 
-# Mask frequencies to focus on the 4000–4800 Hz range for the bandpass filter
+# Plot range for bandpass
 freq_range_mask_bp = (frequencies >= 4100) & (frequencies <= 4700)
 
 # Lowpass filter specifications
-fl_cutoff = 250  # Cutoff frequency in Hz (just above the baseband bandwidth)
-fls = 48000  # Sampling frequency in Hz
-lR_p = 1  # Passband ripple in dB
-lR_s = 40  # Stopband attenuation in dB
+fl_cutoff = 250  # Cutoff frequency
+fls = 48000  # Sampling frequency
+lR_p = 1  # Passband ripple
+lR_s = 40  # Stopband attenuation
 
 # Normalize frequency
 nyquist = fs / 2
 Wn = fl_cutoff / nyquist
 
-# Design Chebyshev Type I lowpass filter
-sos_lowpass = cheby1(N=6, rp=lR_p, Wn=Wn, btype='lowpass', output='sos')
+# Create the lowpass filter
+sos_lowpass = create_lowpass_filter(fls, fl_cutoff, lR_p, lR_s)
 
 # Compute the frequency response of the lowpass filter
 frequencies_lowpass, h_lowpass = sosfreqz(sos_lowpass, worN=worN, fs=fls)
 
-# Mask frequencies to focus on the 0–500 Hz range for clarity
+# Plot range for lowpass
 freq_range_mask_lp = (frequencies_lowpass >= 0) & (frequencies_lowpass <= 400)
 
 # Create the merged plot
 plt.figure(figsize=(12, 6))
 
-# Plot the frequency response of the bandpass filter
-plt.subplot(1, 2, 1)  # First subplot (left side)
+# Plot the frequency responses
+plt.subplot(1, 2, 1)
 plt.plot(frequencies[freq_range_mask_bp], 20 * np.log10(
     np.abs(h[freq_range_mask_bp])), label='Bandpass Filter Frequency Response')
 plt.axvline(f_low, color='green', linestyle='--', label="Passband Lower Edge")
@@ -61,8 +59,7 @@ plt.ylabel('Magnitude [dB]')
 plt.legend()
 plt.grid()
 
-# Plot the frequency response of the lowpass filter
-plt.subplot(1, 2, 2)  # Second subplot (right side)
+plt.subplot(1, 2, 2)
 plt.plot(frequencies_lowpass[freq_range_mask_lp], 20 * np.log10(np.abs(
     h_lowpass[freq_range_mask_lp])), label='Lowpass Filter Frequency Response')
 plt.axvline(fl_cutoff, color='green', linestyle='--', label="Cutoff Frequency")
@@ -73,6 +70,5 @@ plt.ylabel('Magnitude [dB]')
 plt.legend()
 plt.grid()
 
-# Show the plot with both filters in one figure
 plt.tight_layout()
 plt.show()

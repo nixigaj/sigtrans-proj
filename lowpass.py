@@ -1,28 +1,15 @@
-from scipy.signal import cheby1, sosfreqz
-import numpy as np
-import matplotlib.pyplot as plt
+from scipy.signal import cheby1
 
-# Function to create the Chebyshev Type I lowpass filter
-
+# Function to create a Chebyshev Type I lowpass filter of order 6.
+# Great roll-off and infinite attenuation helps to not disturb other channels.
 
 def create_lowpass_filter(fs, f_cutoff, R_p, R_s):
-    """
-    Create a Chebyshev Type I lowpass filter.
 
-    Parameters:
-    fs (int): Sampling frequency in Hz.
-    f_cutoff (float): Cutoff frequency in Hz.
-    R_p (float): Passband ripple in dB.
-    R_s (float): Stopband attenuation in dB.
-
-    Returns:
-    sos (ndarray): Second-order sections of the filter.
-    """
     # Normalize frequency by Nyquist frequency
     nyquist = fs / 2
-    Wn = f_cutoff / nyquist  # Cutoff frequency (normalized)
+    Wn = f_cutoff / nyquist
 
-    # Design the Chebyshev Type I lowpass filter using second-order sections (sos)
+    # Design the filter using second-order sections for performance and stability improvements
     sos = cheby1(N=6, rp=R_p, Wn=Wn, btype='lowpass', output='sos')
     return sos
 

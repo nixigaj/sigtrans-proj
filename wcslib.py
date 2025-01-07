@@ -52,6 +52,26 @@ def decode_string(inbin):
     outstr = "".join([chr(b) for b in tmp])
     return outstr
 
+
+def decode_bytes(inbin):
+    """
+    Converts a binary numpy array to bytes.
+
+    Parameters
+    ----------
+    inbin : numpy.array
+        A binary array of ones and zeros encoding a string.
+    
+    Returns
+    -------
+    outbytes : bytes
+        A bytes object.
+    """
+    tmp = np.packbits(inbin)
+    outbytes = bytes(tmp)
+    return outbytes
+
+
 def encode_baseband_signal(b, Tb, fs):
     """
     Encodes a binary sequence into a baseband signal. In particular, generates 
