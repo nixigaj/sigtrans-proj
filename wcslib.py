@@ -34,6 +34,22 @@ def encode_string(instr):
     tmp = [np.uint8(ord(c)) for c in instr]
     return np.unpackbits(tmp)
 
+def encode_bytes(inbytes):
+    """
+    Converts a bytes object to a binary numpy array.
+
+    Parameters
+    ----------
+    inbytes : bytes
+        A bytes object.
+
+    Returns
+    -------
+    binary : numpy.array
+        A binary array encoding the bytes.
+    """
+    return np.unpackbits(np.frombuffer(inbytes, dtype=np.uint8))
+
 def decode_string(inbin):
     """
     Converts a binary numpy array to string.

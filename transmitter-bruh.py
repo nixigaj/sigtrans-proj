@@ -4,11 +4,10 @@ import wcslib as wcs
 import sounddevice as sd
 from scipy.signal import sosfilt
 from bandpass import create_bandpass_filter
-from ecc import FrameSynchronizer
 
 # Properties
-fc = 4400  # Carrier frequency
-Tb = 0.04  # Symbol duration
+fc = 4800  # Carrier frequency
+Tb = 0.02  # Symbol duration
 fs = 48000  # Sampling frequency
 
 # Detect input or set defaults
@@ -22,18 +21,11 @@ elif len(sys.argv) == 3 and str(sys.argv[1]) == '-b':
 
 else:
     print('Transmitting "Hello World!"', file=sys.stderr)
-    #data = b"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    data = b"Hello, world!!!!!!!!!!!!!!!"
-
-sync = FrameSynchronizer()
-
-frame = sync.prepare_frame(data)
-
-print("Input bytes:", [f'{byte:08b}' for byte in frame])
+    data = "ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ"
 
 # Convert string to bit sequence or string bit sequence to numeric bit sequence
 if string_data:
-    bs = wcs.encode_bytes(frame)
+    bs = wcs.encode_string(data)
 else:
     bs = np.array([bit for bit in map(int, data)])
 
@@ -47,8 +39,8 @@ xc = np.sin(2 * np.pi * fc * np.arange(len(xb)) / fs)
 xm = xb * xc
 
 # Filter specifications
-f_low = 4300  # Lower passband frequency
-f_high = 4500  # Upper passband frequency
+f_low = 4750  # Lower passband frequency
+f_high = 4850  # Upper passband frequency
 R_p = 1  # Passband ripple
 R_s = 40  # Stopband attenuation
 

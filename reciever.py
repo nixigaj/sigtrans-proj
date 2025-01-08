@@ -1,6 +1,8 @@
 import numpy as np
 import sounddevice as sd
 from scipy.signal import sosfilt
+
+from ecc import FrameSynchronizer, flip_last_bit
 from lowpass import create_lowpass_filter
 from bandpass import create_bandpass_filter
 import wcslib as wcs
@@ -46,6 +48,19 @@ yb_filtered = I_filtered + 1j * Q_filtered
 bit_sequence = wcs.decode_baseband_signal(np.abs(yb_filtered), np.angle(yb_filtered), Tb, fs)
 
 # Step 7: Decode the bit sequence into a bytes
-data_rx = wcs.decode_string(bit_sequence)
+data_rx = wcs.decode_bytes(bit_sequence)
 
-print('Received: ' + data_rx)
+sync = FrameSynchronizer(max_bit_errors=1000)
+
+data_rx = flip_last_bit(data_rx)
+
+print("Output bytes:", [f'{byte:08b}' for byte in data_rx])
+
+recovered_frame, remaining = sync.recover_frame(data_rx)
+
+# Extract the original data
+if recovered_frame is not None:
+    recovered_data = sync.extract_data(recovered_frame)
+    print(f"Received: {recovered_frame}")
+else:
+    print("Could not recover")

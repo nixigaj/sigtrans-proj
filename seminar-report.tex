@@ -1,0 +1,176 @@
+\documentclass{article}[11]
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[left=2cm, right=2cm, top=3cm]{geometry}
+
+\title{Signaler och Transformer}
+\author{David Hellström, Erik Junsved, Tove Fraenell, Viyan Altun}
+\date{}
+
+\begin{document}
+\setlength{\parskip}{1em} % Lämna en blankrad
+\setlength{\parindent}{0em} % Indentera inte nya stycken
+
+\maketitle
+
+\newpage
+
+\section{A}
+The modulated signal $xm(t)$ is defined as following: $x_m(t) = x_b(t) x_c(t) = x_b(t) A_c \sin(\omega_c t)$
+
+The Fourier transform of $x_m(t)$ is the convolution of $\mathcal{F} \{x_b(t)\}$
+ and $\mathcal{F} \{ A_c \sin(\omega_c t) \}$, that is:
+\begin{equation}
+    X_m(\omega) = \frac{A_c j}{2} \left[ X_b(\omega + \omega_0) - X_b(\omega - \omega_0) \right] \implies
+    X_m(\omega) = \frac{A_c}{2j} \left[ X_b(\omega - \omega_0) - X_b(\omega + \omega_0) \right]
+\end{equation}
+
+
+
+which is given by Example 3.7 in the compendium and because $\frac{1}{j} = -j$.
+
+
+$x_b(t)$ is given in the project description, that is: $x_b(t) = \sum_{n=0}^{N-1} b_n \, \mathrm{rect} \left( \frac{t - \frac{(2n+1)T_b}{2}}{T_b} \right)$
+
+and $\mathcal{F} \{x_b(t)\}$ is thus: $X_b(\omega) = \sum_{n=0}^{N-1} b_n T_b \, \text{sinc} \left( \frac{\omega T_b}{2 \pi} \right) e^{-j \omega \frac{(2n+1) T_b}{2}}$
+
+Substitute this expression for \( x_b(t) \) into the previous formula for \( X_m(\omega) \) and the result is:
+
+\begin{equation}
+\resizebox{\textwidth}{!}{$
+X_m(\omega) = \sum_{n=0}^{N-1} b_n T_b \cdot \frac{A_c}{2j} \left[ \text{sinc} \left( \frac{ (\omega - \omega_0) T_b}{2\pi} \right) e^{-j (\omega - \omega_0) \frac{(2n+1) T_b}{2}} - \text{sinc} \left( \frac{ (\omega + \omega_0) T_b}{2\pi} \right) e^{-j (\omega + \omega_0) \frac{(2n+1) T_b}{2}} \right]
+$}
+\end{equation}
+
+
+\section{B}
+A suitable carrier frequency $\omega_c$ would be in the middle of the frequency band: $f_c = \frac{4300 \, \text{Hz} + 4500 \, \text{Hz}}{2} = 4400 \, \text{Hz}$,
+$\omega_c = 2\pi f_c = 2\pi \cdot 4400 \, \text{rad/s}$
+
+\begin{figure}[H]
+  \begin{minipage}{0.5\textwidth}
+    An appropriate $T_b$ for reasonable performance with the mainlobe of width $\frac{2}{T_b}$ and two sidelobes of width $\frac{1}{T_b}$ inside the desired frequency band would be:
+    \begin{equation}
+      \frac{4}{T_b} = 200 \implies T_b = \frac{4}{200} = 20 \, \text{ms}
+    \end{equation}
+  \end{minipage}\hfill
+  \begin{minipage}{0.5\textwidth}
+    \centering
+    \includegraphics[width=200px]{toves-ramp.png}
+    \caption{The different lobes illustrated in the $sinc$ function, where the x-axis is the natural frequency.}
+    \label{fig:task}
+  \end{minipage}
+\end{figure}
+
+The bitrate that can be achieved with this choice of $T_b$ is: $R = \frac{1}{T_b} = \frac{1}{0.02} =50 \text{ bits/s}$
+
+
+Trade-off with bitrate exists. With a higher bitrate, more bandwidth is needed. This does transmit the data faster though. Similarly, if you have a lower bitrate, the bandwidth can be lower, but it also leads to a slower data transmission. The lower bitrate also has a higher integrity within the band, compared to the higher bitrate, which can risk for a potential interference or interception.
+
+\section{C}
+
+The provided formulas given in the project description are: $P = \frac{A^2}{2} \text{W}$, and $P = 10^{\frac{P_{\text{dBm}}}{10}} \, \text{mW}$.
+
+Determining the maximum amplitude Ac of the carrier signal and to avoid violating the energy constraint 27dBm would suggest that:
+
+\begin{equation}
+    \frac{A_c^2}{2} = 10^{\frac{27}{10}} \cdot 10^{-3}
+\end{equation}
+\begin{equation}
+\implies
+    \frac{A_c^2}{2} = 10^{-0.3}
+\end{equation}
+\begin{equation}
+\implies
+    A_c = \sqrt{2 \cdot 10^{-0.3}} \approx 1
+\end{equation}
+
+\section{D}
+
+\subsection{In-phase}
+The in-phase component is defined as following:
+\begin{equation}
+    y_{I,d}(t) = y_m(t) \cos(\omega_c t) = A_r y_b(t - t_0) \sin(\omega_c t + \phi_r) \cos(\omega_c t), \tag{2a}
+\end{equation}
+Because of the trigonometric rule:
+\begin{equation}
+    \sin(a) \cos(b) = \frac{1}{2} \left[ \sin(a + b) + \sin(a - b) \right]
+\end{equation}
+
+\begin{equation}
+ \implies y_{I, d}(t) = \frac{A_r}{2} y_b(t - t_0) \left( \sin(2\omega_c t + \phi_r) + \sin(\phi_r) \right)
+\end{equation}
+
+Fourier transforming $y_{I, d}$ gives the following expression:
+\begin{equation}
+Y_{I, d}(\omega) = \frac{A_r}{2} \sin(\phi_r) Y_b(\omega) e^{-j \omega t_0} + \frac{A_r}{4j} \left[ Y_b(\omega - 2\omega_c)e^{j \phi_r} - Y_b(\omega + 2\omega_c)e^{-j \phi_r} \right]
+\end{equation}
+
+
+\subsection{Quadrative}
+The quadrative component is defined as following:
+\begin{equation}
+    y_{Q,d}(t) = -y_m(t) \sin(\omega_c t) = -A_r y_b(t - t_0) \sin(\omega_c t + \phi_r) \sin(\omega_c t).
+\end{equation}
+
+Because of the trigonometric rule:
+\begin{equation}
+    \sin(a) \sin(b) = \frac{1}{2} \left[ \cos(a - b) - \cos(a + b) \right]
+\end{equation}
+
+\begin{equation}
+\implies
+y_{Q, d}(t) = -\frac{A_r}{2} y_b(t - t_0) \left( \cos(\phi_r) - \cos(2\omega_c t + \phi_r) \right)
+\end{equation}
+
+Fourier transforming $y_{Q, d}$ gives the following expression:
+\begin{equation}
+Y_{Q, d}(\omega) = -\frac{A_r}{2} \cos(\phi_r) Y_b(\omega) e^{-j \omega t_0} + \frac{A_r}{4} \left[ Y_b(\omega - 2\omega_c)e^{j \phi_r} + Y_b(\omega + 2\omega_c)e^{-j \phi_r} \right]
+\end{equation}
+
+\section{E}
+
+When analyzing the two simplified expressions for the in-phase and quadrature signals it becomes evident that there is a harmonic at double the frequency of the carrier frequency, that is necessary for extracting the data from the received signals.
+
+\begin{equation}
+\frac{A_r}{2}y_0(t-t_0)(sin(2\omega_ct-\phi_r)+sin(\phi_r))
+\end{equation}
+
+\begin{equation}
+-\frac{A_r}{2}y_b(t-t_0)(cos(\phi_r)-cos(2\omega_ct+\phi_r))
+\end{equation}
+
+In these two equations we are referring to $sin(2\omega_ct-\phi_r)$ and $cos(2\omega_ct+\phi_r)$. If the signal was filtered around the carrier frequency, the higher harmonic would be greatly attenuated, and loss of information would occur.
+
+
+\section{2A}
+As it is impossible for a filter to perfectly attenuate frequencies in the stopband, an acceptable level of attenuation needs determined for the frequencies outside the assigned bandwidth. It has been decicided that an acceptable level of attenuation outside the groups assigned range would be 40 db, as this is commonly used in electronics.
+
+
+For the filter
+
+Chebyshev type 1 for infinite stopband attenuation, stopband 4250 and 4550, passband 4300 and 4500, passband ripple 1dB
+
+
+
+
+\section{Summary}
+Summary: A brief summary of your work, including your approach, key performance
+measures, and results.
+\section{Introduction}
+: A brief introduction to the topic and the problem. The introduc-
+tion should also outline the requirements and how you are going to measure the
+performance of your system.
+\section{Theory}
+: An overview of the theory. Do not make this too exhaustive; you do not
+need to repeat the whole theory section below. Instead, focus on the key bits
+according to the instructions in Section 4. Discuss elements of your system that
+were provided only on a high level and focus on the explanation and motivation of
+the design choices (e.g., frequencies, filter designs, etc.) as requested in Section 4.
+\section{Results and Discussion}
+: Experimental validation of your work including a clear
+description of your experimental conditions and set up, performance measures, etc.
+\section{Conclusions}: A reflection on your work.
+
+\end{document}
