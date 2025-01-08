@@ -6,9 +6,9 @@ from bandpass import create_bandpass_filter
 import wcslib as wcs
 
 # Parameters
-Tb = 0.04   # Symbol duration
+Tb = 0.02   # Symbol duration
 fs = 48000 # Sampling frequency
-duration = 20 # Recording duration
+duration = 80 # Recording duration
 f_low = 4300  # Lower passband frequency
 f_high = 4500  # Upper passband frequency
 R_p = 1  # Passband ripple
@@ -48,4 +48,4 @@ bit_sequence = wcs.decode_baseband_signal(np.abs(yb_filtered), np.angle(yb_filte
 # Step 7: Decode the bit sequence into a bytes
 data_rx = wcs.decode_string(bit_sequence)
 
-print('Received: ' + data_rx)
+print('Received: \"' + data_rx[:-1] + "\"")
